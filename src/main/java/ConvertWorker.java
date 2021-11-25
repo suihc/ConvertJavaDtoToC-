@@ -6,18 +6,27 @@ import java.util.Locale;
 
 public class ConvertWorker {
     public static void main(String[] args) throws IOException {
-        ConvertDtoWorker();
-        COnvertEnumWorker();
-    }
-
-    private static void ConvertDtoWorker() throws IOException {
-        String source = "D:\\newBitbucket\\Forguncy\\BpmJava\\bpm-server\\src\\main\\java\\com\\grapecity\\forguncy\\dto\\forguncy\\extension";
-        String target = "D:\\newClass.txt";
-        File targetFile = new File(target);
+        File targetFile = new File(TARGET);
         if (!targetFile.exists()) {
             targetFile.createNewFile();
         }
         BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(targetFile));
+        bufferedWriter.write("using System;\r\n" +
+                "using System.Collections.Generic;\r\n" +
+                "using ForguncyDataAccess;\r\n" +
+                "using Newtonsoft.Json;\r\n" +
+                "\r\n" +
+                "namespace ServerDesignerCommon.ProcessEngine.ExtensionModel\r\n" +
+                "{" + "\r\n");
+        ConvertDtoWorker(bufferedWriter);
+        COnvertEnumWorker(bufferedWriter);
+        bufferedWriter.write("}");
+        bufferedWriter.close();
+    }
+    private static String TARGET = "D:\\newClass.txt";
+    private static void ConvertDtoWorker(BufferedWriter bufferedWriter) throws IOException {
+        String source = "D:\\newBitbucket\\Forguncy\\BpmJava\\bpm-server\\src\\main\\java\\com\\grapecity\\forguncy\\dto\\forguncy\\extension";
+
         File files = new File(source);
         File[] fileArr = files.listFiles();
 
@@ -36,9 +45,6 @@ public class ConvertWorker {
                         continue;
                     }
                     if (line.contains("@JsonProperty(")) {
-                        continue;
-                    }
-                    if (line.contains("@JSONField(")) {
                         String propertyName = StringUtils.substring(line, line.indexOf("\""), line.lastIndexOf("\"") + 1);
                         line = "    [JsonProperty(" + propertyName + ")]";
                     }
@@ -49,29 +55,31 @@ public class ConvertWorker {
                         line += "{ get; set; }";
                     }
                     line = line.replaceAll(" private ", " public ");
+
                     line = line.replaceAll(" List<", " IEnumerable<");
-                    line = line.replaceAll(" String ", " string ");
-                    line = line.replaceAll(" boolean ", " bool ");
                     line = line.replaceAll(" Object ", " object ");
-                    line = line.replaceAll("<Integer>", "<int>");
                     line = line.replaceAll(" Integer ", " int ");
+                    line = line.replaceAll("<Integer>", "<int>");
+                    line = line.replaceAll(" String ", " string ");
+                    line = line.replaceAll("<String>", "<string>");
+                    line = line.replaceAll(" Boolean ", " bool ");
+                    line = line.replaceAll(" boolean ", " bool ");
+                    line = line.replaceAll("<Boolean>", "<bool>");
+                    line = line.replaceAll("<boolean>", "<bool>");
+                    line = line.replaceAll("<Object>", "<object>");
                     line = line.replaceAll(" extends ", " : ");
+                    line = line.replaceAll("public object TableFieldValue", "public BindingInfo TableFieldValue");
                     bufferedWriter.write(line + "\r\n");
                 }
                 bufferedReader.close();
             }
         }
-        bufferedWriter.close();
+
     }
 
-    private static void COnvertEnumWorker() throws IOException {
-        String source = "D:\\newBitbucket\\Forguncy\\BpmJava\\bpm-server\\src\\main\\java\\com\\grapecity\\forguncy\\enumeration\\forguncy";
-        String target = "D:\\newEnum.txt";
-        File targetFile = new File(target);
-        if (!targetFile.exists()) {
-            targetFile.createNewFile();
-        }
-        BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(targetFile));
+    private static void COnvertEnumWorker(BufferedWriter bufferedWriter) throws IOException {
+        String source = "D:\\newBitbucket\\Forguncy\\BpmJava\\bpm-server\\src\\main\\java\\com\\grapecity\\forguncy\\enumeration\\enumtransform";
+
         File files = new File(source);
         File[] fileArr = files.listFiles();
 
@@ -106,12 +114,19 @@ public class ConvertWorker {
                             break;
                         }
                     }
+                    if (line.contains("public enum DepartmentFilterDirection")) {
+                        bufferedWriter.write("[Flags]" + "\r\n");
+                    }
                     bufferedWriter.write(line + "\r\n");
+                    if (line.contains("LowerOrSelf = 16,")) {
+                        bufferedWriter.write("        ContainsSelf = Self | HigherOrSelf | LowerOrSelf," + "\r\n");
+                        bufferedWriter.write("        ToHigher = Higher | HigherOrSelf," + "\r\n");
+                        bufferedWriter.write("        ToLower = Lower | LowerOrSelf," + "\r\n");
+                    }
                 }
                 bufferedWriter.write("}" + "\r\n");
                 bufferedReader.close();
             }
         }
-        bufferedWriter.close();
     }
 }
