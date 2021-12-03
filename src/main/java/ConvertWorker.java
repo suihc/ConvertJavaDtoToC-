@@ -58,6 +58,8 @@ public class ConvertWorker {
 
                     line = line.replaceAll(" List<", " IEnumerable<");
                     line = line.replaceAll(" Object ", " object ");
+                    line = line.replaceAll(" Long ", " long ");
+                    line = line.replaceAll("<Long>", "<long>");
                     line = line.replaceAll(" Integer ", " int ");
                     line = line.replaceAll("<Integer>", "<int>");
                     line = line.replaceAll(" String ", " string ");
