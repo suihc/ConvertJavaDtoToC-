@@ -2,7 +2,11 @@
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
+import java.util.stream.Collectors;
 
 public class ConvertWorker {
     public static void main(String[] args) throws IOException {
@@ -25,12 +29,11 @@ public class ConvertWorker {
     }
     private static String TARGET = "D:\\newClass.txt";
     private static void ConvertDtoWorker(BufferedWriter bufferedWriter) throws IOException {
-        String source = "D:\\newBitbucket\\Forguncy\\BpmJava\\bpm-server\\src\\main\\java\\com\\grapecity\\forguncy\\dto\\forguncy\\extension";
+        String source = "D:\\newBitbucket\\Forguncy\\BpmJava\\bpm-server\\src\\main\\java\\com\\grapecity\\forguncy\\model\\bpmn";
 
-        File files = new File(source);
-        File[] fileArr = files.listFiles();
-
-        for (File javaDto : fileArr) {
+        File file = new File(source);
+        File[] files = file.listFiles();
+        for (File javaDto : files) {
             if (javaDto.isFile()) {
                 BufferedReader bufferedReader = new BufferedReader(new FileReader(javaDto.getPath()));
                 String line;
@@ -80,12 +83,15 @@ public class ConvertWorker {
     }
 
     private static void COnvertEnumWorker(BufferedWriter bufferedWriter) throws IOException {
-        String source = "D:\\newBitbucket\\Forguncy\\BpmJava\\bpm-server\\src\\main\\java\\com\\grapecity\\forguncy\\enumeration\\enumtransform";
+        String source = "D:\\newBitbucket\\Forguncy\\BpmJava\\bpm-server\\src\\main\\java\\com\\grapecity\\forguncy\\enumeration\\bpmn";
 
         File files = new File(source);
-        File[] fileArr = files.listFiles();
-
-        for (File javaDto : fileArr) {
+        List<File> fileList = Arrays.stream(files.listFiles()).filter(f -> f.isFile()).collect(Collectors.toList());
+        List<File> directoryList = Arrays.stream(files.listFiles()).filter(f -> f.isDirectory()).collect(Collectors.toList());
+        for(File directory : directoryList){
+            fileList.addAll(Arrays.stream(directory.listFiles()).collect(Collectors.toList()));
+        }
+        for (File javaDto : fileList) {
             if (javaDto.isFile()) {
                 BufferedReader bufferedReader = new BufferedReader(new FileReader(javaDto.getPath()));
                 String line;
