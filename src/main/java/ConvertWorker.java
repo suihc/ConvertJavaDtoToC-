@@ -2,10 +2,7 @@
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class ConvertWorker {
@@ -17,13 +14,15 @@ public class ConvertWorker {
         BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(targetFile));
         bufferedWriter.write("using System;\r\n" +
                 "using System.Collections.Generic;\r\n" +
+                "using CommonUtilities;\n" +
+                "using Forguncy.Properties;\n" +
                 "using ForguncyDataAccess;\r\n" +
                 "using Newtonsoft.Json;\r\n" +
                 "\r\n" +
                 "namespace ServerDesignerCommon.ProcessEngine.ExtensionModel\r\n" +
                 "{" + "\r\n");
         ConvertDtoWorker(bufferedWriter);
-        COnvertEnumWorker(bufferedWriter);
+        ConvertEnumWorker(bufferedWriter);
         bufferedWriter.write("}");
         bufferedWriter.close();
     }
@@ -33,6 +32,16 @@ public class ConvertWorker {
 
         File file = new File(source);
         File[] files = file.listFiles();
+
+        String enumsource = "D:\\newBitbucket\\Forguncy\\BpmJava\\bpm-server\\src\\main\\java\\com\\grapecity\\forguncy\\enumeration\\bpmn";
+
+        File enumfiles = new File(enumsource);
+        List<File> enumfileList = Arrays.stream(enumfiles.listFiles()).filter(f -> f.isFile()).collect(Collectors.toList());
+        List<File> directoryList = Arrays.stream(enumfiles.listFiles()).filter(f -> f.isDirectory()).collect(Collectors.toList());
+        for(File directory : directoryList){
+            enumfileList.addAll(Arrays.stream(directory.listFiles()).collect(Collectors.toList()));
+        }
+        List<String> collect = enumfileList.stream().map(f -> f.getName().substring(0, f.getName().length() - ".java".length())).collect(Collectors.toList());
         for (File javaDto : files) {
             if (javaDto.isFile()) {
                 BufferedReader bufferedReader = new BufferedReader(new FileReader(javaDto.getPath()));
@@ -61,18 +70,21 @@ public class ConvertWorker {
 
                     line = line.replaceAll(" List<", " IEnumerable<");
                     line = line.replaceAll(" Object ", " object ");
-                    line = line.replaceAll(" Long ", " long ");
-                    line = line.replaceAll("<Long>", "<long>");
-                    line = line.replaceAll(" Integer ", " int ");
-                    line = line.replaceAll("<Integer>", "<int>");
+                    line = line.replaceAll(" Long ", " long? ");
+                    line = line.replaceAll("<Long>", "<long?>");
+                    line = line.replaceAll(" Integer ", " int? ");
+                    line = line.replaceAll("<Integer>", "<int?>");
                     line = line.replaceAll(" String ", " string ");
                     line = line.replaceAll("<String>", "<string>");
-                    line = line.replaceAll(" Boolean ", " bool ");
+                    line = line.replaceAll(" Boolean ", " bool? ");
                     line = line.replaceAll(" boolean ", " bool ");
-                    line = line.replaceAll("<Boolean>", "<bool>");
+                    line = line.replaceAll("<Boolean>", "<bool?>");
                     line = line.replaceAll("<boolean>", "<bool>");
                     line = line.replaceAll("<Object>", "<object>");
                     line = line.replaceAll(" extends ", " : ");
+                    for(String enumName : collect){
+                        line = line.replaceAll(" "+enumName+" ", " "+enumName+"? ");
+                    }
                     line = line.replaceAll("public object TableFieldValue", "public BindingInfo TableFieldValue");
                     bufferedWriter.write(line + "\r\n");
                 }
@@ -82,7 +94,7 @@ public class ConvertWorker {
 
     }
 
-    private static void COnvertEnumWorker(BufferedWriter bufferedWriter) throws IOException {
+    private static void ConvertEnumWorker(BufferedWriter bufferedWriter) throws IOException {
         String source = "D:\\newBitbucket\\Forguncy\\BpmJava\\bpm-server\\src\\main\\java\\com\\grapecity\\forguncy\\enumeration\\bpmn";
 
         File files = new File(source);
@@ -92,7 +104,7 @@ public class ConvertWorker {
             fileList.addAll(Arrays.stream(directory.listFiles()).collect(Collectors.toList()));
         }
         for (File javaDto : fileList) {
-            if (javaDto.isFile()) {
+            if (javaDto.isFile() && !javaDto.getName().equals("TaskActionType.java") && !javaDto.getName().equals("RollbackType.java")) {
                 BufferedReader bufferedReader = new BufferedReader(new FileReader(javaDto.getPath()));
                 String line;
                 boolean isPublicStart = false;
@@ -136,5 +148,43 @@ public class ConvertWorker {
                 bufferedReader.close();
             }
         }
+        bufferedWriter.write("public enum TaskActionType\n" +
+                "    {\n" +
+                "        [SRDescription(nameof(Resources.CommandName_ProcessTaskCommand_OperateAgree))]\n" +
+                "        Agree = 100,\n" +
+                "        [SRDescription(nameof(Resources.CommandName_ProcessTaskCommand_OperateReject))]\n" +
+                "        Reject = 200,\n" +
+                "        [SRDescription(nameof(Resources.CommandName_ProcessTaskCommand_OperateRollback))]\n" +
+                "        Rollback = 300,\n" +
+                "        [SRDescription(nameof(Resources.CommandName_ProcessTaskCommand_OperateDispatch))]\n" +
+                "        Dispatch = 400,\n" +
+                "        [SRDescription(nameof(Resources.CommandName_ProcessTaskCommand_OperateTransfer))]\n" +
+                "        Transfer = 500,\n" +
+                "        [SRDescription(nameof(Resources.CommandName_ProcessTaskCommand_OperateSuspend))]\n" +
+                "        Suspend = 600,\n" +
+                "        [SRDescription(nameof(Resources.CommandName_ProcessTaskCommand_OperateActivate))]\n" +
+                "        Activate = 601,\n" +
+                "        [SRDescription(nameof(Resources.CommandName_ProcessTaskCommand_OperateCancel))]\n" +
+                "        Cancel = 700,\n" +
+                "        [SRDescription(nameof(Resources.CommandName_ProcessTaskCommand_OperateDelete))]\n" +
+                "        Delete = 800,\n" +
+                "        [SRDescription(nameof(Resources.CommandName_ProcessTaskCommand_OperateInform))]\n" +
+                "        Inform = 900,\n" +
+                "        [SRDescription(nameof(Resources.CommandName_ProcessTaskCommand_OperateRead))]\n" +
+                "        Read = 901,\n" +
+                "        [SRDescription(nameof(Resources.CommandName_ProcessTaskCommand_UpdateAssignee))]\n" +
+                "        UpdateAssignee = 1000,\n" +
+                "        [SRDescription(nameof(Resources.CommandName_ProcessTaskCommand_UpdateDescription))]\n" +
+                "        UpdateDescription = 1001,\n" +
+                "        [SRDescription(nameof(Resources.CommandName_ProcessTaskCommand_UpdateFormKey))]\n" +
+                "        UpdateFormKey = 1002,\n" +
+                "    }\n");
+        bufferedWriter.write("public enum RollbackType\r\n" +
+                "    {\r\n" +
+                "        [SRDescription(nameof(Resources.CommandName_ProcessTaskCommand_Rollback_ToPrevious))]\r\n" +
+                "        ToPrevious = 1,\r\n" +
+                "        [SRDescription(nameof(Resources.CommandName_ProcessTaskCommand_Rollback_ToStart))]\r\n" +
+                "        ToStart = 2,\r\n" +
+                "    }\r\n");
     }
 }
