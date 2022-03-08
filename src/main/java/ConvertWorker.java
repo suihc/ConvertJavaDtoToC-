@@ -120,6 +120,9 @@ public class ConvertWorker {
                     if(line.contains("@ResourceKey(key")){
                         continue;
                     }
+                    if(line.contains("//")){
+                        continue;
+                    }
                     if (line.startsWith("public enum ")) {
                         isPublicStart = true;
                         line = line.substring(0, line.indexOf(" implements ")) + "{";
@@ -164,20 +167,18 @@ public class ConvertWorker {
                 "        Suspend = 600,\n" +
                 "        [SRDescription(nameof(Resources.CommandName_ProcessTaskCommand_OperateActivate))]\n" +
                 "        Activate = 601,*/\n" +
-                "        [SRDescription(nameof(Resources.CommandName_ProcessTaskCommand_OperateCancel))]\n" +
-                "        Cancel = 700,\n" +
                 "        [SRDescription(nameof(Resources.CommandName_ProcessTaskCommand_OperateDelete))]\n" +
-                "        Delete = 800,\n" +
+                "        Delete = 700,\n" +
                 "        /*[SRDescription(nameof(Resources.CommandName_ProcessTaskCommand_OperateInform))]\n" +
-                "        Inform = 900,\n" +
+                "        Inform = 800,\n" +
                 "        [SRDescription(nameof(Resources.CommandName_ProcessTaskCommand_OperateRead))]\n" +
-                "        Read = 901,*/\n" +
+                "        Read = 801,*/\n" +
                 "        [SRDescription(nameof(Resources.CommandName_ProcessTaskCommand_UpdateAssignee))]\n" +
-                "        UpdateAssignee = 1000,\n" +
-                "        [SRDescription(nameof(Resources.CommandName_ProcessTaskCommand_UpdateSummary))]\n" +
-                "        UpdateSummary = 1001,\n" +
+                "        UpdateAssignee = 900,\n" +
+                "        [SRDescription(nameof(Resources.CommandName_ProcessTaskCommand_UpdateDescription))]\n" +
+                "        UpdateDescription = 901,\n" +
                 "        [SRDescription(nameof(Resources.CommandName_ProcessTaskCommand_UpdateFormKey))]\n" +
-                "        UpdateFormKey = 1002,\n" +
+                "        UpdateFormKey = 902,\n" +
                 "    }\n");
         bufferedWriter.write("public enum RollbackType\r\n" +
                 "    {\r\n" +
@@ -185,6 +186,8 @@ public class ConvertWorker {
                 "        ToPrevious = 1,\r\n" +
                 "        [SRDescription(nameof(Resources.CommandName_ProcessTaskCommand_Rollback_ToStart))]\r\n" +
                 "        ToStart = 2,\r\n" +
+                "        [SRDescription(nameof(Resources.CommandName_ProcessTaskCommand_Rollback_BackToFrom))]\r\n" +
+                "        BackToFrom = 3,\r\n" +
                 "    }\r\n");
     }
 }
